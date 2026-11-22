@@ -1,4 +1,4 @@
-"""Request and response models. T9 adds upload/list/search; QA is T10."""
+"""Request and response models. T10 adds the QA surface."""
 
 from __future__ import annotations
 
@@ -51,3 +51,23 @@ class SearchHitModel(BaseModel):
 class SearchResponse(BaseModel):
     query: str
     hits: list[SearchHitModel]
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+
+
+class Citation(BaseModel):
+    index: int
+    chunk_id: int
+    filename: str
+    line_start: int
+    line_end: int
+    quote: str
+
+
+class AskResponse(BaseModel):
+    answer: str
+    citations: list[Citation]
+    refused: bool
+    latency_ms: int

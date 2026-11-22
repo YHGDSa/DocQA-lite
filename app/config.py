@@ -27,3 +27,21 @@ MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
 # inside one FTS5 hit on a corpus of a few dozen documents.
 CHUNK_CHAR_SIZE = int(os.environ.get("DOCQA_CHUNK_CHAR_SIZE", "400"))
 CHUNK_CHAR_OVERLAP = int(os.environ.get("DOCQA_CHUNK_CHAR_OVERLAP", "50"))
+
+# --- LLM (T10) -------------------------------------------------------------
+# Read from the process environment only. DocQA-lite never loads a .env file,
+# never prints these values, and never writes them anywhere; pytest never calls
+# the model (app.llm.chat is monkeypatched in tests).
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "").strip()
+LLM_API_KEY = os.environ.get("LLM_API_KEY", "").strip()
+LLM_MODEL = os.environ.get("LLM_MODEL", "").strip()
+
+# Refusal gate. Retrieval quality is measured by how much of the question the
+# chunk actually covers (see retrieval._overlap), not by bm25's score, whose
+# magnitude swings with corpus size and chunk length (see DECISIONS D24).
+REFUSAL_OVERLAP_THRESHOLD = float(
+    os.environ.get("DOCQA_REFUSAL_OVERLAP_THRESHOLD", "0.05")
+)
+
+#: One fixed sentence, so "no evidence" is testable and never model-flavoured.
+REFUSAL_TEXT = "未在文档中找到依据。"

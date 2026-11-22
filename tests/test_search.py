@@ -48,3 +48,23 @@ def test_search_short_query_falls_back_to_like(client):
 
     blank = client.post("/search", json={"query": ""})
     assert blank.status_code == 422
+
+    # LIKE metacharacters must match themselves, not act as wildcards. Both new
+    # documents contain a "0", but only one contains the literal "0%".
+    assert _upload(client, "pricing.md", "折扣 10% 起，需审批。").status_code == 201
+    assert _upload(client, "orders.md", "订单号 2024-001。").status_code == 201
+
+    percent = client.post("/search", json={"query": "0%"})
+    assert percent.status_code == 200
+    percent_hits = percent.json()["hits"]
+    assert len(percent_hits) == 1
+    assert percent_hits[0]["filename"] == "pricing.md"
+    assert "10%" in percent_hits[0]["text"]
+
+    # Three characters go through FTS5, which is literal by construction; the
+    # assertion keeps the two paths honest about the same string.
+    literal = client.post("/search", json={"query": "10%"})
+    assert literal.status_code == 200
+    literal_hits = literal.json()["hits"]
+    assert len(literal_hits) == 1
+    assert literal_hits[0]["filename"] == "pricing.md"
