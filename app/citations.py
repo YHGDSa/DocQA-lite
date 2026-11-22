@@ -15,6 +15,7 @@ from app.retrieval import SearchHit
 from app.schemas import Citation
 
 CITATION_RE = re.compile(r"\[(\d+)\]")
+MALFORMED_CITATION_RE = re.compile(r"\[(?!\d+\])\s*\d[^\]\r\n]*\]")
 
 
 def extract_ids(answer: str) -> list[int]:
@@ -35,8 +36,10 @@ def validate_answer(answer: str, hits: list[SearchHit]) -> tuple[bool, list[int]
     text = (answer or "").strip()
     if not text:
         return False, []
-    if REFUSAL_TEXT in text:
+    if text == REFUSAL_TEXT:
         return True, []
+    if REFUSAL_TEXT in text or MALFORMED_CITATION_RE.search(text):
+        return False, []
     ids = extract_ids(text)
     if not ids:
         return False, []
