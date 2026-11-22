@@ -181,10 +181,10 @@ curl -N -X POST http://127.0.0.1:8001/ask/stream -H "Content-Type: application/j
 | 拒答正确率（30 题） | 17/30 (56.7%) | **22/30 (73.3%)** |
 | 引用正确率（answerable 且未拒答） | 0/12 | **12/12 (100%)** |
 | 检索命中率（answerable 全部） | 0/12 | **12/12 (100%)** |
-| 平均端到端延迟 | ~6 ms | ~6 ms |
+| 平均端到端延迟 | 见评测报告 | 见评测报告 |
 
-delta 没拒掉的 7 条 unanswerable 都共享通用词（`公司`/`城市`/`年假`），放行后假模型永远声称有答案：
-这 22/30 是**没有真模型时的下限**。同一批题接到真实模型后，8 条无答案题全部正确拒答（见下）。
+脚本化模型在检索闸门放行后总会给出固定答案。22/30 是这套离线样本和脚本下的拒答正确率。
+下方的 12 题真实模型评测有独立结果。逐题差异和延迟口径见 [离线评测报告](eval/report.md)。
 
 ### 真实模型 12 题（`python eval/run_llm_eval.py`）
 
@@ -218,13 +218,12 @@ delta 没拒掉的 7 条 unanswerable 都共享通用词（`公司`/`城市`/`�
 
 ## 验证状态
 
-- **干净检出**（`git archive HEAD` → 空目录 → 新建 venv → `pip install -r requirements.txt`）：
-  安装成功、`python -m pytest -q` → 14 passed、`python eval/run_eval.py` → 30 题通过、
-  `python scripts/demo_offline.py` 逐字复现上面的输出。
+- **离线验证**：`python -m pytest -q` 执行测试，`python eval/run_eval.py` 对 30 道题运行两种配置，
+  `python scripts/demo_offline.py` 演示上传、检索、带引用问答、拒答和 SSE 事件。
 - **真实模型**（`deepseek-chat`）：上传 → 检索 → `/ask` → `/ask/stream` 冒烟通过；
   12 题小评测 4/4 答案、4/4 证据支持、8/8 无答案题拒答，逐题见 [docs/REAL-LLM.md](docs/REAL-LLM.md)。
 - **CI**（`.github/workflows/ci.yml`）：Ubuntu + Windows、Python 3.12，依次跑
-  测试 → 离线 30 题评测 → 报告校验 → 无 Key 演示；推送仓库后生效。
+  测试 → 离线 30 题评测 → 报告校验 → 无 Key 演示。
 
 ## License
 
