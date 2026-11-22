@@ -8,6 +8,9 @@ jobs:
   test:
     name: ${{ matrix.os }} · Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    env:
+      # Windows runners default to a legacy code page; the demo prints Chinese.
+      PYTHONUTF8: "1"
     strategy:
       fail-fast: false
       matrix:

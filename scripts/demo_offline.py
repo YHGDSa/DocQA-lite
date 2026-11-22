@@ -39,6 +39,16 @@ SCRIPTED = {
 _OUT: list[str] = []
 
 
+def _force_utf8_stdout() -> None:
+    """Windows consoles/CI pipes default to a legacy code page (cp1252), which
+    cannot encode the Chinese transcript. Reconfigure instead of crashing."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):  # non-text streams, old Python
+            pass
+
+
 def say(line: str = "") -> None:
     print(line)
     _OUT.append(line)
@@ -68,6 +78,7 @@ def _upload(client: TestClient, path: Path) -> dict:
 
 
 def main(argv: list[str]) -> int:
+    _force_utf8_stdout()
     out_path = None
     if "--out" in argv:
         out_path = Path(argv[argv.index("--out") + 1]).resolve()
