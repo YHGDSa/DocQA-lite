@@ -1,7 +1,7 @@
 """FastAPI application factory for DocQA-lite.
 
-T8 scope: build the app, create the SQLite schema on startup, answer /health.
-Upload, chunking, search, QA and SSE arrive in T9/T10/T11.
+T9 scope: the SQLite schema, /health, upload, document list and chunk search.
+QA/citations/SSE arrive in T10/T11.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ from fastapi import FastAPI
 
 from app import config
 from app.db import init_db
+from app.routes import router
 from app.schemas import HealthResponse
 
 
@@ -27,8 +28,9 @@ def create_app(db_path: str | None = None) -> FastAPI:
     ``db_path`` is explicit so tests can point at a per-test tmp_path database;
     production uses ``config.DB_PATH``.
     """
-    app = FastAPI(title="DocQA-lite", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="DocQA-lite", version="0.2.0", lifespan=lifespan)
     app.state.db_path = str(db_path if db_path is not None else config.DB_PATH)
+    app.include_router(router)
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
