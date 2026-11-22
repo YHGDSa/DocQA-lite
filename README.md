@@ -2,17 +2,27 @@
 
 [![CI](https://github.com/YHGDSa/DocQA-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/YHGDSa/DocQA-lite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![tests](https://img.shields.io/badge/tests-14%20passed-brightgreen)](tests)
 [![eval](https://img.shields.io/badge/offline%20eval-30%20tasks-brightgreen)](eval/report.md)
 
 把 md/txt 文档变成**可引用、会拒答**的问答服务：上传 → 字符切片（带字符偏移与行号）→ SQLite FTS5 检索 → LLM 生成 → 引用校验 → SSE 流式输出。**不用向量库、图数据库或 rerank**：一个 SQLite 文件 + 任意 OpenAI 兼容 chat 接口即可运行。
 
 ## 30 秒无 Key 演示
 
+需要 Python 3.12。克隆仓库并进入项目目录后运行以下命令。
+
 ```bash
-python -m venv .venv && .venv\Scripts\activate    # Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python scripts/demo_offline.py
+```
+
+Windows PowerShell 可以直接使用虚拟环境里的解释器。
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts/demo_offline.py
 ```
 
 真实输出（模型是 10 行脚本，所以逐字可复现；演示的是**管线**，不是模型能力）：
@@ -58,7 +68,7 @@ SQLite: documents / chunks / chunks_fts(FTS5 trigram) / qa_logs
 | 目录 | 内容 |
 |---|---|
 | `app/` | FastAPI 应用：`routes`（HTTP）、`retrieval`（FTS5 + LIKE）、`chunking`（字符切片）、`citations`（引用校验）、`llm`（OpenAI 兼容客户端）、`db`（DDL） |
-| `tests/` | 14 个 pytest：健康检查、上传/去重/空文档、检索偏移、短查询、引用、拒答、SSE |
+| `tests/` | 离线 pytest：健康检查、上传/去重/空文档、检索偏移、短查询、引用、拒答、SSE |
 | `eval/` | 30 题离线管线评测（脚本化模型）+ 12 题真实模型评测 + 三篇演示文档 |
 | `docs/` | `REAL-LLM.md`（真实模型验收逐题结果）、`REFERENCE-B.md`（切片/引用思路来源） |
 | `scripts/` | `demo_offline.py`（无 Key 演示）、`run_tests.py`（沙箱友好的测试入口） |
@@ -71,7 +81,7 @@ python -m venv .venv
 .venv\Scripts\activate                  # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 
-python -m pytest -q                     # 14 passed
+python -m pytest -q
 python eval/run_eval.py                 # 30 题离线评测，写 eval/report.md
 python scripts/demo_offline.py          # 上面的无 Key 演示
 ```
@@ -129,7 +139,7 @@ curl -N -X POST http://127.0.0.1:8001/ask/stream -H "Content-Type: application/j
 `/ask/stream` 先发 `citations`（本次检索到的 **1..n 段候选**），再逐个 `token`，最后 `done`；
 模型输出里的 `[n]` 合法性**不在流里校验**——生成是流式的，模型可能把 `[n]` 写到最后一个 token。
 
-`/ask` 才对引用做最终校验：只认裸 `[n]`，越界（`n > len(hits)`）或完全没有 `[n]` 一律降级为固定拒答
+`/ask` 对引用做最终校验。引用越界（`n < 1` 或 `n > len(hits)`）、含混合编号（例如 `[1,2]`）或完全没有裸 `[n]` 时，返回固定拒答
 `未在文档中找到依据。`。所以：
 
 - 要“经过校验、可以核对”的引用 → 用 `/ask`；

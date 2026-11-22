@@ -7,6 +7,8 @@ never touches the network and never needs an API key.
 import json
 import sqlite3
 
+import pytest
+
 from app import config
 
 HANDBOOK = "员工手册\n员工年假 10 天可结转，需提前申请。\n"
@@ -120,11 +122,16 @@ def test_ask_without_evidence_refuses(client, monkeypatch):
     assert rows[0]["citations_json"] == "[]"
 
 
-def test_citation_out_of_range_refuses(client, monkeypatch):
+@pytest.mark.parametrize("model_answer", [
+    "年假 10 天 [9]",
+    "年假 10 天 [1]，可以无限累积 [1,2]。",
+    f"年假 100 天 [1]。{config.REFUSAL_TEXT}",
+])
+def test_invalid_citations_or_mixed_refusal_refuse(client, monkeypatch, model_answer):
     assert _upload(client, "handbook.md", "员工年假 10 天可结转。").status_code == 201
 
     async def fake_chat(messages, temperature=0.0):
-        return "年假 10 天 [9]"
+        return model_answer
 
     monkeypatch.setattr("app.llm.chat", fake_chat)
 

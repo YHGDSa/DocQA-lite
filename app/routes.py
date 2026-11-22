@@ -343,8 +343,8 @@ async def ask(
         citation_models = []
         refused = True
     elif not ids:
-        # The model refused by itself; keep its wording, cite nothing.
-        final_answer = answer.strip()
+        # The model returned the canonical refusal.
+        final_answer = config.REFUSAL_TEXT
         citation_models = []
         refused = True
     else:
