@@ -3,7 +3,7 @@
 The model is asked to end every claim with a bare ``[n]``. Anything else --
 no marker, a malformed marker like ``[1,2]``, or a marker pointing outside the
 chunks that were actually shown -- is treated as an unsupported answer and
-downgraded to the fixed refusal. See DECISIONS D25.
+downgraded to the fixed refusal (see README, "SSE 与引用校验").
 """
 
 from __future__ import annotations

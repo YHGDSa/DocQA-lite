@@ -40,7 +40,7 @@ LLM_MODEL = os.environ.get("LLM_MODEL", "").strip()
 
 # Refusal gate. Retrieval quality is measured by how much of the question the
 # chunk actually covers (see retrieval._overlap), not by bm25's score, whose
-# magnitude swings with corpus size and chunk length (see DECISIONS D24).
+# magnitude swings with corpus size and chunk length (see README, 设计取舍).
 REFUSAL_OVERLAP_THRESHOLD = float(
     os.environ.get("DOCQA_REFUSAL_OVERLAP_THRESHOLD", "0.05")
 )

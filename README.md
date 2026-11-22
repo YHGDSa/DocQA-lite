@@ -205,6 +205,16 @@ delta 没拒掉的 7 条 unanswerable 都共享通用词（`公司`/`城市`/`�
 - 无 key 时 `/ask` 返回 `503`（不是 500）；上游错误只回状态码，不回 key。
 - 所有 SQL 参数化；上传只取文件名 basename，不落盘；`.env` / `*.db` / `data/` / `.tmp/` 已在 `.gitignore`。
 
+## 验证状态
+
+- **干净检出**（`git archive HEAD` → 空目录 → 新建 venv → `pip install -r requirements.txt`）：
+  安装成功、`python -m pytest -q` → 14 passed、`python eval/run_eval.py` → 30 题通过、
+  `python scripts/demo_offline.py` 逐字复现上面的输出。
+- **真实模型**（`deepseek-chat`）：上传 → 检索 → `/ask` → `/ask/stream` 冒烟通过；
+  12 题小评测 4/4 答案、4/4 证据支持、8/8 无答案题拒答，逐题见 [docs/REAL-LLM.md](docs/REAL-LLM.md)。
+- **CI**（`.github/workflows/ci.yml`）：Ubuntu + Windows、Python 3.12，依次跑
+  测试 → 离线 30 题评测 → 报告校验 → 无 Key 演示；推送仓库后生效。
+
 ## License
 
 [MIT](LICENSE)
