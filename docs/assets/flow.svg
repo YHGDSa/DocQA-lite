@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 975 232" width="975" height="232" role="img" aria-labelledby="title description">
+  <title id="title">DocQA-lite</title>
+  <desc id="description">Upload a UTF-8 document, retrieve SQLite chunks, then ask a question. The answer endpoint checks citation markers and returns source locations or refuses.</desc>
+  <style>
+    .signal { animation: move 2.8s ease-in-out infinite; }
+    @keyframes move {
+      0%, 17% { transform: translateX(0); opacity: 0; }
+      25% { opacity: 1; }
+      56% { transform: translateX(25px); opacity: 1; }
+      67%, 100% { transform: translateX(25px); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .signal { animation: none; opacity: 0; } }
+  </style>
+  <rect x="1" y="1" width="973" height="230" rx="18" fill="#0e1524" stroke="#394760"/>
+  <g font-family="system-ui, Segoe UI, sans-serif">
+    <text x="35" y="59" font-size="32" font-weight="700" fill="#f5f7fb">DocQA-lite</text>
+    <text x="35" y="88" font-size="16" fill="#bfcbe0">Document QA with source citations</text>
+    
+  <rect x="35" y="120" width="192" height="78" rx="12" fill="#171f32" stroke="#394760"/>
+  <text x="51" y="147" font-size="13" fill="#86efac">01</text>
+  <text x="51" y="168" font-size="16" font-weight="600" fill="#f5f7fb">Upload</text>
+  <text x="51" y="186" font-size="12" fill="#bfcbe0">UTF-8 Markdown or text</text>
+  <path d="M231 160h34m-7-6 7 6-7 6" fill="none" stroke="#74839e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle class="signal" cx="233" cy="160" r="3" fill="#86efac" style="animation-delay:0.0s"/>
+  <rect x="272" y="120" width="192" height="78" rx="12" fill="#171f32" stroke="#394760"/>
+  <text x="288" y="147" font-size="13" fill="#86efac">02</text>
+  <text x="288" y="168" font-size="16" font-weight="600" fill="#f5f7fb">Retrieve</text>
+  <text x="288" y="186" font-size="12" fill="#bfcbe0">SQLite FTS5 and LIKE</text>
+  <path d="M468 160h34m-7-6 7 6-7 6" fill="none" stroke="#74839e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle class="signal" cx="470" cy="160" r="3" fill="#86efac" style="animation-delay:0.45s"/>
+  <rect x="509" y="120" width="192" height="78" rx="12" fill="#171f32" stroke="#394760"/>
+  <text x="525" y="147" font-size="13" fill="#86efac">03</text>
+  <text x="525" y="168" font-size="16" font-weight="600" fill="#f5f7fb">Answer or refuse</text>
+  <text x="525" y="186" font-size="12" fill="#bfcbe0">Check retrieved evidence</text>
+  <path d="M705 160h34m-7-6 7 6-7 6" fill="none" stroke="#74839e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle class="signal" cx="707" cy="160" r="3" fill="#86efac" style="animation-delay:0.9s"/>
+  <rect x="746" y="120" width="192" height="78" rx="12" fill="#171f32" stroke="#394760"/>
+  <text x="762" y="147" font-size="13" fill="#86efac">04</text>
+  <text x="762" y="168" font-size="16" font-weight="600" fill="#f5f7fb">Return citations</text>
+  <text x="762" y="186" font-size="12" fill="#bfcbe0">File and line range</text>
+  </g>
+</svg>
