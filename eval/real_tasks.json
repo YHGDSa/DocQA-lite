@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "notes": "真实模型小评测：12 题，覆盖有明确答案 / 完全无关 / 主题相关但原文没有答案。需要进程环境变量 LLM_BASE_URL / LLM_API_KEY / LLM_MODEL。",
+  "tasks": [
+    {
+      "id": "r01",
+      "category": "answerable",
+      "question": "年假有多少天，没休完怎么处理",
+      "expect_refused": false,
+      "gold_filename": "handbook.md",
+      "gold_quotes": ["年假 10 天", "未休完可结转至次年一季度"],
+      "expect_keywords": ["10 天", "结转"]
+    },
+    {
+      "id": "r02",
+      "category": "answerable",
+      "question": "差旅报销多久到账",
+      "expect_refused": false,
+      "gold_filename": "handbook.md",
+      "gold_quotes": ["5 个工作日内到账"],
+      "expect_keywords": ["5 个工作日"]
+    },
+    {
+      "id": "r03",
+      "category": "answerable",
+      "question": "密码多久必须换一次",
+      "expect_refused": false,
+      "gold_filename": "security.md",
+      "gold_quotes": ["每 90 天必须更换一次"],
+      "expect_keywords": ["90 天"]
+    },
+    {
+      "id": "r04",
+      "category": "answerable",
+      "question": "一线城市住宿标准是多少",
+      "expect_refused": false,
+      "gold_filename": "travel.md",
+      "gold_quotes": ["每晚 600 元"],
+      "expect_keywords": ["600"]
+    },
+    {
+      "id": "r05",
+      "category": "unrelated",
+      "question": "公司有没有股票期权",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r06",
+      "category": "unrelated",
+      "question": "服务器机房在哪个城市",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r07",
+      "category": "unrelated",
+      "question": "公司年会在什么时候办",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r08",
+      "category": "unrelated",
+      "question": "我们的竞争对手是哪家公司",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r09",
+      "category": "near_miss",
+      "question": "年假可以折现吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r10",
+      "category": "near_miss",
+      "question": "病假期间的工资怎么算",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r11",
+      "category": "near_miss",
+      "question": "住宿标准包含餐饮吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    },
+    {
+      "id": "r12",
+      "category": "near_miss",
+      "question": "出差可以坐高铁一等座吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "expect_keywords": []
+    }
+  ]
+}

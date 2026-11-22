@@ -1,4 +1,4 @@
-"""T9: chunk search, source offsets and the short-query fallback."""
+"""Chunk search, source offsets and the short-query fallback."""
 
 FILLER = "无关段落。" * 90  # 450 characters -> the keyword lands in chunk 2
 KEYWORD = "年假 10 天"

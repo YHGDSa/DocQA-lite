@@ -1,6 +1,6 @@
 # REFERENCE-B · 从 LightRAG 借的两件事：切片元数据 + 引用回原文
 
-> 读于 2026-11-22。B 项目（DocQA-lite）只借思路与字段形状，不复制代码。
+> 读于 2026-11-22。DocQA-lite 只借思路与字段形状，不复制代码。
 
 ## 1. 仓库 / 分支 / 日期
 
@@ -8,7 +8,7 @@
 - 分支：`main`
 - 读取时最新提交：`f01ddea`（2026-11-22T03:13:23Z）
 - 读取日期：2026-11-22
-- 路径说明：任务里写的 `lightrag/chunker.py` 在当前 main 上已拆成包 `lightrag/chunker/`，默认策略在 `chunker/token_size.py`；我读的是后者，没有读包里的 `paragraph_semantic.py` / `semantic_vector.py` / `recursive_character.py`。
+- 路径说明：上游仓库里 `lightrag/chunker.py` 在当前 main 上已拆成包 `lightrag/chunker/`，默认策略在 `chunker/token_size.py`；我读的是后者，没有读包里的 `paragraph_semantic.py` / `semantic_vector.py` / `recursive_character.py`。
 
 ## 2. 我实际读了哪两个文件、哪几个函数
 
@@ -34,10 +34,10 @@
 - 引用：`generate_reference_list_from_chunks` 按 `file_path` 去重，按“出现次数降序 + 首次出现顺序”编号 `"1"`, `"2"`……；`render_chunks_context_text` 把每个 chunk 压成 `{"reference_id", "content"}` 一行 JSON 喂给模型；上下文末尾再附 `[1] file_path` 形式的来源清单；返回给调用方的 raw_data 里 chunk 带 `reference_id`，前端据此把答案里的 `[n]` 对回文件。
 - 关键限制：**它的引用粒度是文件，不是位置**。字符级的 `_source_span` 只在切片内部用（而且要显式 `_emit_source_span=True` 才带），查询链路没有把它暴露给用户。
 
-## 4. 2 周版本为什么不做图 / 向量
+## 4. 为什么这一版不做图 / 向量
 
 - 语料小：内部文档在几十篇量级，切片能整库进内存，BM25（SQLite FTS5）取前几条就够；
-- 图的成本在抽取：实体/关系抽取要多次 LLM 调用、要 prompt 调优、要合并去重，2 周会把时间吃光，而在几十篇语料上收益不明显；
+- 图的成本在抽取：实体/关系抽取要多次 LLM 调用、要 prompt 调优、要合并去重，在几十篇语料上收益不明显；
 - 向量要 embedding 服务 + 索引 + 阈值调参，且“语义相似”不等于“答得对”，阈值调不好反而更难解释；
 - 引用可验证：BM25 命中 chunk 后能直接给出字符偏移和行号，答案里的 `[n]` 可以回到原文具体位置核对——这正是本项目要证明的东西，图/向量不帮这个忙。
 

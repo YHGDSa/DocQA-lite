@@ -1,0 +1,285 @@
+{
+  "generated_at": "2026-11-22 11:25:08 UTC",
+  "model": "deepseek-chat",
+  "summary": {
+    "total": 12,
+    "answer_correct": 4,
+    "answer_total": 4,
+    "evidence_supported": 4,
+    "evidence_total": 4,
+    "refusal_correct": 8,
+    "refusal_total": 8,
+    "errors": []
+  },
+  "questions": [
+    {
+      "id": "r01",
+      "category": "answerable",
+      "question": "年假有多少天，没休完怎么处理",
+      "expect_refused": false,
+      "gold_filename": "handbook.md",
+      "gold_quotes": [
+        "年假 10 天",
+        "未休完可结转至次年一季度"
+      ],
+      "status": 200,
+      "refused": false,
+      "answer": "年假有 10 天 [1]。未休完可结转至次年一季度 [1]。",
+      "citations": [
+        {
+          "index": 1,
+          "chunk_id": 1,
+          "filename": "handbook.md",
+          "line_start": 1,
+          "line_end": 13,
+          "quote": "# 员工手册\n\n## 第一章 假期\n\n员工年假 10 天，需提前一周申请，未休完可结转至次年一季度。\n\n病假需提供医院证明；事假按小时计。\n\n## 第二章 报销\n\n差旅报销需在 7 个工作日内提交，财务在 5 个工作日内到账。\n\n市内交通报销单笔上限 200 元。\n"
+        }
+      ],
+      "citation_texts": [
+        "# 员工手册\n\n## 第一章 假期\n\n员工年假 10 天，需提前一周申请，未休完可结转至次年一季度。\n\n病假需提供医院证明；事假按小时计。\n\n## 第二章 报销\n\n差旅报销需在 7 个工作日内提交，财务在 5 个工作日内到账。\n\n市内交通报销单笔上限 200 元。\n"
+      ],
+      "latency_ms": 820,
+      "error": null,
+      "answer_ok": true,
+      "evidence_ok": true,
+      "refused_ok": true
+    },
+    {
+      "id": "r02",
+      "category": "answerable",
+      "question": "差旅报销多久到账",
+      "expect_refused": false,
+      "gold_filename": "handbook.md",
+      "gold_quotes": [
+        "5 个工作日内到账"
+      ],
+      "status": 200,
+      "refused": false,
+      "answer": "差旅报销财务在 5 个工作日内到账 [1]。",
+      "citations": [
+        {
+          "index": 1,
+          "chunk_id": 1,
+          "filename": "handbook.md",
+          "line_start": 1,
+          "line_end": 13,
+          "quote": "# 员工手册\n\n## 第一章 假期\n\n员工年假 10 天，需提前一周申请，未休完可结转至次年一季度。\n\n病假需提供医院证明；事假按小时计。\n\n## 第二章 报销\n\n差旅报销需在 7 个工作日内提交，财务在 5 个工作日内到账。\n\n市内交通报销单笔上限 200 元。\n"
+        }
+      ],
+      "citation_texts": [
+        "# 员工手册\n\n## 第一章 假期\n\n员工年假 10 天，需提前一周申请，未休完可结转至次年一季度。\n\n病假需提供医院证明；事假按小时计。\n\n## 第二章 报销\n\n差旅报销需在 7 个工作日内提交，财务在 5 个工作日内到账。\n\n市内交通报销单笔上限 200 元。\n"
+      ],
+      "latency_ms": 578,
+      "error": null,
+      "answer_ok": true,
+      "evidence_ok": true,
+      "refused_ok": true
+    },
+    {
+      "id": "r03",
+      "category": "answerable",
+      "question": "密码多久必须换一次",
+      "expect_refused": false,
+      "gold_filename": "security.md",
+      "gold_quotes": [
+        "每 90 天必须更换一次"
+      ],
+      "status": 200,
+      "refused": false,
+      "answer": "公司账号密码每 90 天必须更换一次 [1]。",
+      "citations": [
+        {
+          "index": 1,
+          "chunk_id": 2,
+          "filename": "security.md",
+          "line_start": 1,
+          "line_end": 13,
+          "quote": "# 信息安全规范\n\n## 账号管理\n\n公司账号密码每 90 天必须更换一次，禁止重复使用最近 3 次的密码。\n\n离职员工的账号在 24 小时内停用。\n\n## 数据管理\n\n客户数据不得存放在个人网盘。\n\n数据外发需经过数据负责人审批。\n"
+        }
+      ],
+      "citation_texts": [
+        "# 信息安全规范\n\n## 账号管理\n\n公司账号密码每 90 天必须更换一次，禁止重复使用最近 3 次的密码。\n\n离职员工的账号在 24 小时内停用。\n\n## 数据管理\n\n客户数据不得存放在个人网盘。\n\n数据外发需经过数据负责人审批。\n"
+      ],
+      "latency_ms": 1299,
+      "error": null,
+      "answer_ok": true,
+      "evidence_ok": true,
+      "refused_ok": true
+    },
+    {
+      "id": "r04",
+      "category": "answerable",
+      "question": "一线城市住宿标准是多少",
+      "expect_refused": false,
+      "gold_filename": "travel.md",
+      "gold_quotes": [
+        "每晚 600 元"
+      ],
+      "status": 200,
+      "refused": false,
+      "answer": "一线城市住宿标准每晚 600 元 [1]。",
+      "citations": [
+        {
+          "index": 1,
+          "chunk_id": 3,
+          "filename": "travel.md",
+          "line_start": 1,
+          "line_end": 11,
+          "quote": "# 差旅制度\n\n## 机票\n\n国内出差机票需通过公司差旅平台预订，经济舱为标准舱位。\n\n单程飞行超过 4 小时可申请公务舱。\n\n## 住宿\n\n一线城市住宿标准每晚 600 元，其他城市每晚 400 元。\n"
+        }
+      ],
+      "citation_texts": [
+        "# 差旅制度\n\n## 机票\n\n国内出差机票需通过公司差旅平台预订，经济舱为标准舱位。\n\n单程飞行超过 4 小时可申请公务舱。\n\n## 住宿\n\n一线城市住宿标准每晚 600 元，其他城市每晚 400 元。\n"
+      ],
+      "latency_ms": 657,
+      "error": null,
+      "answer_ok": true,
+      "evidence_ok": true,
+      "refused_ok": true
+    },
+    {
+      "id": "r05",
+      "category": "unrelated",
+      "question": "公司有没有股票期权",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 888,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r06",
+      "category": "unrelated",
+      "question": "服务器机房在哪个城市",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 966,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r07",
+      "category": "unrelated",
+      "question": "公司年会在什么时候办",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 1316,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r08",
+      "category": "unrelated",
+      "question": "我们的竞争对手是哪家公司",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 833,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r09",
+      "category": "near_miss",
+      "question": "年假可以折现吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 1025,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r10",
+      "category": "near_miss",
+      "question": "病假期间的工资怎么算",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 622,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r11",
+      "category": "near_miss",
+      "question": "住宿标准包含餐饮吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 575,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    },
+    {
+      "id": "r12",
+      "category": "near_miss",
+      "question": "出差可以坐高铁一等座吗",
+      "expect_refused": true,
+      "gold_filename": null,
+      "gold_quotes": [],
+      "status": 200,
+      "refused": true,
+      "answer": "未在文档中找到依据。",
+      "citations": [],
+      "citation_texts": [],
+      "latency_ms": 513,
+      "error": null,
+      "answer_ok": null,
+      "evidence_ok": null,
+      "refused_ok": true
+    }
+  ]
+}

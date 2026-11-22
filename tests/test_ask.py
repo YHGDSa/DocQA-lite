@@ -1,4 +1,4 @@
-"""T10 ask + T11 SSE stream.
+"""Ask with citations, refusal without evidence, out-of-range citation and SSE.
 
 Every test monkeypatches ``app.llm.chat`` / ``app.llm.stream_chat``: pytest
 never touches the network and never needs an API key.

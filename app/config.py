@@ -1,8 +1,9 @@
 """DocQA-lite configuration.
 
 Paths, upload limits, chunking knobs, the refusal threshold and the LLM
-settings. T10 起读 ``LLM_*``：只从进程环境变量读取，从不读 ``.env`` 文件，
-也从不打印、不写日志、不进 ``qa_logs``。
+settings. The ``LLM_*`` values are read from process environment variables
+only -- DocQA-lite never loads a ``.env`` file, and never prints, logs or
+stores the key.
 """
 
 from __future__ import annotations
@@ -15,9 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SQLite file. Tests override this by passing db_path= to create_app().
 DB_PATH = os.environ.get("DOCQA_DB_PATH", str(BASE_DIR / "data" / "docqa.db"))
 
-# Upload cap for the 2-week version: small enough that one request cannot
-# exhaust the box. The route reads at most MAX_FILE_BYTES + 1 bytes, so an
-# oversized upload is rejected without buffering the whole file.
+# Upload cap for a small deployment: low enough that one request cannot exhaust
+# the box. The route reads at most MAX_FILE_BYTES + 1 bytes, so an oversized
+# upload is rejected without buffering the whole file.
 MAX_FILE_MB = int(os.environ.get("DOCQA_MAX_FILE_MB", "2"))
 MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
 
@@ -29,7 +30,7 @@ MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
 CHUNK_CHAR_SIZE = int(os.environ.get("DOCQA_CHUNK_CHAR_SIZE", "400"))
 CHUNK_CHAR_OVERLAP = int(os.environ.get("DOCQA_CHUNK_CHAR_OVERLAP", "50"))
 
-# --- LLM (T10) -------------------------------------------------------------
+# --- LLM -------------------------------------------------------------------
 # Read from the process environment only. DocQA-lite never loads a .env file,
 # never prints these values, and never writes them anywhere; pytest never calls
 # the model (app.llm.chat is monkeypatched in tests).

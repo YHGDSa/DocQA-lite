@@ -1,4 +1,4 @@
-"""Request and response models. T10 adds the QA surface."""
+"""Request and response models."""
 
 from __future__ import annotations
 

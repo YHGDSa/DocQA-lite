@@ -1,4 +1,4 @@
-"""T8 health + T9 upload, dedupe and listing."""
+"""Health, upload, dedupe, listing and empty-document rejection."""
 
 from app.chunking import chunk_text
 from app.config import CHUNK_CHAR_OVERLAP, CHUNK_CHAR_SIZE, MAX_FILE_BYTES

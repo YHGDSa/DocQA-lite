@@ -1,7 +1,7 @@
 """FastAPI application factory for DocQA-lite.
 
-T9 scope: the SQLite schema, /health, upload, document list and chunk search.
-QA/citations/SSE arrive in T10/T11.
+The app owns one SQLite file: the schema is created on startup by the lifespan
+handler, and every route lives in :mod:`app.routes`.
 """
 
 from __future__ import annotations

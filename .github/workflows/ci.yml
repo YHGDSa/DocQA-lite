@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} · Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Offline pipeline eval (30 tasks, scripted model)
+        run: python eval/run_eval.py
+
+      - name: Check eval report
+        run: python scripts/check_eval_report.py
+
+      - name: Offline demo (no API key)
+        run: python scripts/demo_offline.py

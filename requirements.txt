@@ -1,5 +1,6 @@
-fastapi
-uvicorn
-pytest
-httpx
-python-multipart
+# Runtime + test dependencies, pinned to the versions this repo is tested with.
+fastapi==0.165.0
+uvicorn==0.54.0
+pytest==9.2.0
+httpx==0.28.1
+python-multipart==0.0.34

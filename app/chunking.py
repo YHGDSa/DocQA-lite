@@ -2,7 +2,7 @@
 
 Offsets are Python string indices, never bytes, so ``text[char_start:char_end]``
 always slices the original document back out -- that is what makes a citation
-verifiable in T10. Line numbers are 1-based and inclusive on both ends.
+verifiable. Line numbers are 1-based and inclusive on both ends.
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
 """SQLite connection helpers and the schema every phase shares.
 
-The column set is frozen: T9 (upload/chunk/search) and T10 (QA/citations) read
-these tables as-is, so a later phase adds tables or migration code instead of
+The column set is frozen: the upload/search and ask/citation paths read these
+tables as-is, so a later change adds tables or migration code instead of
 editing the columns below.
 
 One deviation from the originally drafted DDL is documented inline: SQLite

@@ -9,9 +9,9 @@ Run from the project root:
 
     python eval/run_eval.py
 
-Stdlib + TestClient only; no network, no API key. Databases live under
-``.tmp/eval/`` inside the repo because pytest's/tempfile's default temp
-directories are not usable inside the DSH sandbox (see PROGRESS T6/T11 notes).
+Stdlib + TestClient only; no network, no API key. Databases are written under
+``.tmp/eval/`` inside the repo because some sandboxed environments (CI runners,
+IDE sandboxes) do not give the process a writable system temp directory.
 """
 
 from __future__ import annotations

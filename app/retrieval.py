@@ -191,8 +191,8 @@ def search_for_question(
     so the exact-phrase search above finds nothing. The fallback matches the
     question's character bigrams with LIKE and ranks chunks by how many
     distinct bigrams they contain. The corpus is a few dozen documents, so the
-    scan is cheap; precision is not this function's job -- the LLM answer and
-    the citation check in T10 are.
+    scan is cheap; precision is not this function's job -- the model answer and
+    the citation check in the ask path are.
     """
     hits = search_chunks(conn, question, top_k)
     if hits:
