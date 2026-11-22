@@ -7,6 +7,9 @@ in an exception message.
 
 from __future__ import annotations
 
+import json
+from typing import AsyncIterator
+
 import httpx
 
 from app import config
@@ -67,3 +70,60 @@ async def chat(messages: list[dict], temperature: float = 0.0) -> str:
     if not isinstance(content, str):
         raise LLMError("LLM response content is not a string")
     return content
+
+
+async def stream_chat(
+    messages: list[dict], temperature: float = 0.0
+) -> AsyncIterator[str]:
+    """Yield content deltas from an OpenAI-compatible streaming completion.
+
+    Only ``data:`` lines are interpreted; ``[DONE]`` ends the stream. A frame
+    with no ``delta.content`` (role frames, usage frames) is skipped, and an
+    unparseable frame is ignored rather than aborting the whole answer.
+    """
+    if not is_configured():
+        raise LLMNotConfigured(
+            "LLM not configured: set LLM_BASE_URL/LLM_API_KEY/LLM_MODEL"
+        )
+
+    url = config.LLM_BASE_URL.rstrip("/") + "/chat/completions"
+    payload = {
+        "model": config.LLM_MODEL,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": 512,
+        "stream": True,
+    }
+    headers = {
+        "Authorization": f"Bearer {config.LLM_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            async with client.stream(
+                "POST", url, json=payload, headers=headers
+            ) as response:
+                if response.status_code >= 400:
+                    raise LLMError(f"LLM returned HTTP {response.status_code}")
+
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line or not line.startswith("data:"):
+                        continue
+                    data = line[len("data:") :].strip()
+                    if data == "[DONE]":
+                        return
+                    try:
+                        frame = json.loads(data)
+                    except ValueError:
+                        continue
+                    choices = frame.get("choices") if isinstance(frame, dict) else None
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    content = delta.get("content")
+                    if isinstance(content, str) and content:
+                        yield content
+    except httpx.HTTPError as exc:
+        raise LLMError(f"LLM stream failed: {type(exc).__name__}") from exc

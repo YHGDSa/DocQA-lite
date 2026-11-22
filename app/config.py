@@ -1,7 +1,8 @@
 """DocQA-lite configuration.
 
-Paths, upload limits and the chunking knobs. No LLM setting is read here --
-T8/T9 do not call a model, and no key is required, read or logged.
+Paths, upload limits, chunking knobs, the refusal threshold and the LLM
+settings. T10 起读 ``LLM_*``：只从进程环境变量读取，从不读 ``.env`` 文件，
+也从不打印、不写日志、不进 ``qa_logs``。
 """
 
 from __future__ import annotations

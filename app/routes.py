@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
+from fastapi.responses import StreamingResponse
 
 from app import citations, config, llm
 from app.chunking import chunk_text
@@ -30,6 +31,15 @@ from app.schemas import (
 )
 
 router = APIRouter()
+
+#: Eval switch (see eval/run_eval.py). True skips the overlap refusal gate and
+#: citation validation so the eval can measure what those two layers add.
+#: Defaults to False and is only set inside eval, then restored in a finally.
+BASELINE = False
+
+#: SSE headers: no caching, and no proxy buffering in front of the stream.
+SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+
 
 #: The 2-week version reads plain text only; PDF/DOCX parsing is out of scope.
 ALLOWED_SUFFIXES = {".md", ".txt"}
@@ -121,22 +131,61 @@ def upload_document(
         )
 
     chunks = chunk_text(text, config.CHUNK_CHAR_SIZE, config.CHUNK_CHAR_OVERLAP)
-    with conn:
-        cursor = conn.execute(
-            "INSERT INTO documents (filename, sha256, size, deleted_at, created_at)"
-            " VALUES (?, ?, ?, NULL, ?)",
-            (filename, digest, len(data), _utcnow()),
-        )
-        doc_id = int(cursor.lastrowid)
-        # The chunks_ai trigger keeps chunks_fts in sync inside this transaction.
-        conn.executemany(
-            "INSERT INTO chunks"
-            " (doc_id, seq, text, char_start, char_end, line_start, line_end)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [
-                (doc_id, c.seq, c.text, c.char_start, c.char_end, c.line_start, c.line_end)
-                for c in chunks
-            ],
+    if not chunks:
+        # Reached only for text that has no non-whitespace character; storing a
+        # document with zero chunks would create a row that can never be found.
+        raise HTTPException(status_code=400, detail="document has no content")
+
+    try:
+        with conn:
+            cursor = conn.execute(
+                "INSERT INTO documents (filename, sha256, size, deleted_at, created_at)"
+                " VALUES (?, ?, ?, NULL, ?)",
+                (filename, digest, len(data), _utcnow()),
+            )
+            doc_id = int(cursor.lastrowid)
+            # The chunks_ai trigger keeps chunks_fts in sync inside this transaction.
+            conn.executemany(
+                "INSERT INTO chunks"
+                " (doc_id, seq, text, char_start, char_end, line_start, line_end)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [
+                    (
+                        doc_id,
+                        c.seq,
+                        c.text,
+                        c.char_start,
+                        c.char_end,
+                        c.line_start,
+                        c.line_end,
+                    )
+                    for c in chunks
+                ],
+            )
+    except sqlite3.IntegrityError:
+        # Lost a race with a concurrent upload of the same bytes: the UNIQUE
+        # (sha256) constraint fired after our SELECT but before this INSERT.
+        # Re-read what the winner wrote instead of turning it into a 500.
+        winner = conn.execute(
+            "SELECT id, filename, size FROM documents"
+            " WHERE sha256 = ? AND deleted_at IS NULL",
+            (digest,),
+        ).fetchone()
+        if winner is None:
+            # The hash exists but only on a soft-deleted row: not a duplicate we
+            # can serve, and not a document we can re-create (unique sha256).
+            raise HTTPException(
+                status_code=409,
+                detail="duplicate hash exists but document is not active",
+            )
+        response.status_code = 200
+        winner_id = int(winner["id"])
+        return UploadResponse(
+            id=winner_id,
+            filename=winner["filename"],
+            size=int(winner["size"]),
+            chunks=_count_chunks(conn, winner_id),
+            duplicated=True,
         )
 
     response.status_code = 201
@@ -245,6 +294,30 @@ async def ask(
     hits = search_for_question(conn, question, top_k=ASK_TOP_K)
     best_overlap = max((hit.overlap for hit in hits), default=0.0)
 
+    if BASELINE:
+        # Eval only: skip the overlap gate and the citation check so the eval
+        # can measure what those two layers add. The model is asked even when
+        # nothing was retrieved -- that is the unguarded baseline.
+        messages = (
+            _build_ask_messages(question, hits)
+            if hits
+            else [{"role": "user", "content": f"问题：{question}"}]
+        )
+        try:
+            answer = await llm.chat(messages)
+        except llm.LLMNotConfigured as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except llm.LLMError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+        latency_ms = _elapsed_ms(started)
+        _log_qa(conn, question, answer, [], False, latency_ms)
+        return AskResponse(
+            answer=answer,
+            citations=[],
+            refused=False,
+            latency_ms=latency_ms,
+        )
+
     # No evidence at all, or the best chunk covers too little of the question:
     # refuse before spending a model call. This is the only refusal path that
     # is guaranteed to work without an API key.
@@ -290,4 +363,102 @@ async def ask(
         citations=citation_models,
         refused=refused,
         latency_ms=latency_ms,
+    )
+
+
+def _sse(event: str, payload: dict) -> str:
+    """One Server-Sent Event frame."""
+    return f"event: {event}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
+def _log_qa_at(
+    db_path: str,
+    question: str,
+    answer: str,
+    citations_out: list,
+    refused: bool,
+    latency_ms: int,
+) -> None:
+    """Log from inside a stream, where the request-scoped connection is gone."""
+    conn = connect(db_path)
+    try:
+        _log_qa(conn, question, answer, citations_out, refused, latency_ms)
+    finally:
+        conn.close()
+
+
+@router.post("/ask/stream")
+async def ask_stream(
+    payload: AskRequest,
+    request: Request,
+    conn: sqlite3.Connection = Depends(get_db),
+) -> StreamingResponse:
+    """Stream the answer as SSE: citations -> token* -> done.
+
+    Retrieval and the refusal decision happen before the stream starts, so a
+    missing key is still a clean 503 rather than a 200 followed by a broken
+    body. The citations event carries *candidates* -- one per retrieved chunk --
+    not a validated answer; `POST /ask` remains the endpoint that decides
+    whether the answer's [n] markers are legal (see DECISIONS D26).
+    """
+    started = time.perf_counter()
+    db_path = request.app.state.db_path
+    question = payload.question.strip()
+    if not question:
+        raise HTTPException(status_code=422, detail="question must not be blank")
+
+    hits = search_for_question(conn, question, top_k=ASK_TOP_K)
+    best_overlap = max((hit.overlap for hit in hits), default=0.0)
+    refuse_upfront = not hits or best_overlap < config.REFUSAL_OVERLAP_THRESHOLD
+
+    # Checked before the response starts: a stream that cannot reach a model
+    # must fail as 503, not as 200 + an error frame.
+    if not refuse_upfront and not llm.is_configured():
+        raise HTTPException(
+            status_code=503,
+            detail="LLM not configured: set LLM_BASE_URL/LLM_API_KEY/LLM_MODEL",
+        )
+
+    messages = [] if refuse_upfront else _build_ask_messages(question, hits)
+    citation_preview = (
+        []
+        if refuse_upfront
+        else [
+            citations.build_citation(index, hit)
+            for index, hit in enumerate(hits, start=1)
+        ]
+    )
+
+    async def event_stream():
+        yield _sse(
+            "citations",
+            {"citations": [citation.model_dump() for citation in citation_preview]},
+        )
+
+        if refuse_upfront:
+            yield _sse("token", {"text": config.REFUSAL_TEXT})
+            yield _sse("done", {"refused": True})
+            _log_qa_at(
+                db_path, question, config.REFUSAL_TEXT, [], True, _elapsed_ms(started)
+            )
+            return
+
+        parts: list[str] = []
+        try:
+            async for token in llm.stream_chat(messages):
+                parts.append(token)
+                yield _sse("token", {"text": token})
+        except llm.LLMError as exc:
+            yield _sse("error", {"message": str(exc)})
+            yield _sse("done", {"refused": False})
+            return
+
+        answer = "".join(parts).strip()
+        yield _sse("done", {"refused": False})
+        _log_qa_at(
+            db_path, question, answer, citation_preview, False, _elapsed_ms(started)
+        )
+
+    return StreamingResponse(
+        event_stream(), media_type="text/event-stream", headers=SSE_HEADERS
     )

@@ -85,3 +85,11 @@ def test_list_documents(client):
         len(long_text.encode("utf-8")),
         len(short_text.encode("utf-8")),
     ]
+
+
+def test_upload_empty_document_rejected(client):
+    """Empty and whitespace-only files are rejected, and leave no row behind."""
+    assert _upload(client, "empty.md", "").status_code == 400
+    assert _upload(client, "blank.md", "   \n  ").status_code == 400
+    # A document with zero chunks could never be retrieved, so none is stored.
+    assert client.get("/documents").json()["total"] == 0

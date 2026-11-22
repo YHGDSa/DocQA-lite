@@ -1,9 +1,10 @@
-"""T10: ask with citations, refusal without evidence, out-of-range citation.
+"""T10 ask + T11 SSE stream.
 
-Every test monkeypatches ``app.llm.chat``: pytest never touches the network and
-never needs an API key.
+Every test monkeypatches ``app.llm.chat`` / ``app.llm.stream_chat``: pytest
+never touches the network and never needs an API key.
 """
 
+import json
 import sqlite3
 
 from app import config
@@ -25,6 +26,25 @@ def _qa_rows(client):
         return conn.execute("SELECT * FROM qa_logs ORDER BY id").fetchall()
     finally:
         conn.close()
+
+
+def _sse_events(response):
+    """Parse an SSE body into ``[(event, payload), ...]``."""
+    events = []
+    name = None
+    for line in response.iter_lines():
+        if line.startswith("event:"):
+            name = line.split(":", 1)[1].strip()
+        elif line.startswith("data:"):
+            events.append((name, json.loads(line.split(":", 1)[1].strip())))
+    return events
+
+
+def _configure_llm(monkeypatch):
+    """Pretend a model is configured; the chat call itself is still mocked."""
+    monkeypatch.setattr(config, "LLM_BASE_URL", "http://llm.invalid/v1")
+    monkeypatch.setattr(config, "LLM_API_KEY", "not-a-real-key")
+    monkeypatch.setattr(config, "LLM_MODEL", "test-model")
 
 
 def test_ask_with_evidence_has_citations(client, monkeypatch):
@@ -118,3 +138,59 @@ def test_citation_out_of_range_refuses(client, monkeypatch):
     rows = _qa_rows(client)
     assert len(rows) == 1
     assert rows[0]["refused"] == 1
+
+
+def test_ask_stream_events(client, monkeypatch):
+    assert _upload(client, "handbook.md", HANDBOOK).status_code == 201
+    _configure_llm(monkeypatch)
+
+    async def fake_stream(messages, temperature=0.0):
+        for piece in ("员工", "年假", " [1]"):
+            yield piece
+
+    monkeypatch.setattr("app.llm.stream_chat", fake_stream)
+
+    with client.stream(
+        "POST", "/ask/stream", json={"question": "年假多少天"}
+    ) as response:
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/event-stream")
+        assert response.headers["cache-control"] == "no-cache"
+        events = _sse_events(response)
+
+    assert events, "no SSE frames received"
+    assert events[0][0] == "citations"
+    preview = events[0][1]["citations"]
+    assert len(preview) >= 1
+    assert preview[0]["index"] == 1
+    assert preview[0]["filename"] == "handbook.md"
+    assert preview[0]["quote"]
+
+    tokens = [payload["text"] for name, payload in events if name == "token"]
+    assert len(tokens) >= 2
+    assert "".join(tokens) == "员工年假 [1]"
+    assert events[-1][0] == "done"
+    assert events[-1][1]["refused"] is False
+
+
+def test_ask_stream_refuses_without_evidence(client, monkeypatch):
+    assert _upload(client, "handbook.md", "员工年假 10 天。").status_code == 201
+
+    async def boom(messages, temperature=0.0):
+        raise AssertionError("stream_chat must not be called without evidence")
+        yield ""  # pragma: no cover
+
+    monkeypatch.setattr("app.llm.stream_chat", boom)
+
+    with client.stream(
+        "POST", "/ask/stream", json={"question": "公司有没有股票期权"}
+    ) as response:
+        assert response.status_code == 200
+        events = _sse_events(response)
+
+    assert events[0][0] == "citations"
+    assert events[0][1]["citations"] == []
+    assert events[1][0] == "token"
+    assert events[1][1]["text"] == config.REFUSAL_TEXT
+    assert events[-1][0] == "done"
+    assert events[-1][1]["refused"] is True
