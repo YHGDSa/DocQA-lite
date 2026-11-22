@@ -1,6 +1,6 @@
 # DocQA-lite
 
-[![CI](https://github.com/YHGDSa/docqa-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/YHGDSa/docqa-lite/actions/workflows/ci.yml)
+[![CI](https://github.com/YHGDSa/DocQA-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/YHGDSa/DocQA-lite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-14%20passed-brightgreen)](tests)
 [![eval](https://img.shields.io/badge/offline%20eval-30%20tasks-brightgreen)](eval/report.md)
@@ -66,7 +66,7 @@ SQLite: documents / chunks / chunks_fts(FTS5 trigram) / qa_logs
 ## 安装与验证（干净检出）
 
 ```bash
-git clone https://github.com/YHGDSa/docqa-lite.git && cd docqa-lite
+git clone https://github.com/YHGDSa/DocQA-lite.git && cd DocQA-lite
 python -m venv .venv
 .venv\Scripts\activate                  # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
